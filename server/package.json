@@ -1,0 +1,22 @@
+{
+  "name": "csgo_clicker",
+  "version": "1.0.0",
+  "description": "Accept game popup from your mobile phone",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "node client/index.js",
+    "server": "node server/index.js"
+  },
+  "keywords": [
+    "node",
+    "csgo",
+    "web"
+  ],
+  "author": "Evan Buss",
+  "license": "ISC",
+  "dependencies": {
+    "evilscan": "^1.7.5",
+    "robotjs": "github:sidharth0094/robotjs#master"
+  }
+}
