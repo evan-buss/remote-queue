@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "client": "node client/index.js",
-    "server": "node server/index.js"
+    "start": "./node_modules/.bin/tsc && node ./dist/server/index.js"
   },
   "keywords": [
     "node",
@@ -17,6 +16,14 @@
   "license": "ISC",
   "dependencies": {
     "evilscan": "^1.7.5",
-    "robotjs": "github:sidharth0094/robotjs#master"
+    "express": "^4.17.1",
+    "express.io": "^1.1.13",
+    "robotjs": "github:sidharth0094/robotjs#master",
+    "ws": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.0",
+    "@types/ws": "^6.0.2",
+    "typescript": "^3.5.3"
   }
 }
