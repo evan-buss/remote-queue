@@ -1,0 +1,54 @@
+Computer States
+
+    WAITING
+        - In the game queue, waiting for a specific screen event to trigger 
+    READY
+        - Game queue is ready, waiting for user to accept or decline
+
+
+PROTOCOL MESSAGES
+    Client -> Server:
+        (maybe) - Join the Queue
+            - This requires a lot more complexity than accepting a queue
+        ACCEPT_GAME:
+            - Click the ready button on computer
+        DECLINE_GAME:
+            - Don't do anything for the ACCEPT_WINDOW
+        
+    Server -> Client:
+        GAME_READY:
+            - Alert user that ACCEPT_WINDOW has started
+            - Give the user a countdown timer
+            - Show accept and decline buttons to the user
+        QUEUE_FAILED:
+            - Alert the user that not everyone accepted the queue
+            - Hide the buttons
+            - Client waits for GAME_READY again.
+
+
+
+Game Class
+    - CLICK_POS (x, y)
+    - READY_COLOR (RGB) (x, y)
+    - ACCEPT_WINDOW (time in seconds)
+    - INTERVAL (time in second to poll the screen for changes)
+
+    Events:
+        - Loop at INTERVAL
+        - Once the READY_COLOR has been seen, send a message to the client
+        - Start internal accept window timer
+        - User accepts:
+            - Click the given CLICK_POS
+            - If the user clicked, rut not everyone accepted in the window, restart
+                - Not sure exactly how to determine this.
+        - User doesn't accept within ACCEPT_WINDOW:
+            - Leave the queue
+            - Alert user
+
+Necessary Game Client States
+    No Queue State
+        - Client is not currently in the queue
+    Queue Popped State
+        - Queue accept button is visible
+    Success State
+        - Game is loading

@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
       title: 'Wireless Game Confirmation',
       theme: ThemeData.dark(),
       routes: {
-        '/' : (context) => HomePage(),
+        '/': (context) => HomePage(),
         '/game': (context) => GameConfirmation()
       },
     );
