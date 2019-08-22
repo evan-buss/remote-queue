@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 import * as os from 'os';
-import { Game } from "./game";
+import { Game, GameProfile } from "./game";
 
 /**
  * Messages recieved from the client
@@ -16,6 +16,7 @@ export const ClientMessages = {
  * Messages that can be sent from the server
  */
 export const ServerMessages = {
+    CONNECT: "CONNECT",
     GAME_READY: "GAME_READY",
     QUEUE_FAILED: "QUEUE_FAILED",
     QUEUE_TIMEOUT: "QUEUE_TIMEOUT",
@@ -36,9 +37,13 @@ export class Server {
         this.app = express();
         this.server = http.createServer(this.app);
         this.wss = new WebSocket.Server({ server: this.server });
+        this.game = new Game();
 
         this.wss.on('connection', (ws: WebSocket) => {
-            this.game = new Game(ws);
+            console.log("PROFILE: " + this.game.profile.name);
+
+            ws.send(JSON.stringify({ "message": ServerMessages.CONNECT, "body": this.game.profile.name }))
+            this.game.setWS(ws);
 
             ws.on('message', (message: String) => {
                 // Handle incoming messages
@@ -70,12 +75,17 @@ export class Server {
     startServer = () => {
         console.log("Starting Server");
 
-        this.server.listen(process.env.PORT || 1337, () => {
-            console.log(`Server started on port 1337`)
+        this.server.listen(this.port, () => {
+            console.log(`Server started on port ${this.port}`)
         });
     }
 
     stopServer = () => {
         this.server.close();
+        this.wss.close();
+    }
+
+    setGame = (game: GameProfile) => {
+        this.game.setGame(game);
     }
 }

@@ -28,29 +28,18 @@ class _GameConfirmationState extends State<GameConfirmation> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.computer.hostname),
-        actions: <Widget>[
-          FlatButton(
-            child: Text("DISCONNECT"),
-            onPressed: () {
-              widget.channel.sink.close(status.normalClosure);
-            },
-          )
-        ],
       ),
       body: StreamBuilder(
         stream: widget.channel.stream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             // Stream is done or interupted, go back to device list
-            // Navigator.pop(context);
+            widget.channel.sink.close(status.normalClosure);
+            Navigator.pop(context);
           }
           return snapshot.hasData
               ? _streamRouter(snapshot, context)
-              : Center(
-                  child: Text("In Queue for CSGO",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).primaryTextTheme.display2),
-                );
+              : Text("no messages");
         },
       ),
     );
@@ -59,6 +48,11 @@ class _GameConfirmationState extends State<GameConfirmation> {
   Widget _streamRouter(AsyncSnapshot snapshot, BuildContext context) {
     var response = json.decode(snapshot.data);
     switch (response["message"]) {
+      case ServerMessages.CONNECT:
+        return Text("In Queue for ${response["body"]}",
+            textAlign: TextAlign.center,
+            style: Theme.of(context).primaryTextTheme.display2);
+
       case ServerMessages.GAME_READY:
         // print(response["body"] is int);
         // acceptTime = response["body"];

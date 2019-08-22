@@ -16,12 +16,16 @@ class _HomePageState extends State<HomePage> {
   int scannedCounter = 0;
   var networkScanStream;
   bool isLoading = true;
+  int port = 1337;
 
   @override
   void initState() {
     super.initState();
-    networkScanStream = NetworkAnalyzer.discover("192.168.1", 1337)
-        .where((ip) => ip.exists); // initial stream
+    networkScanStream = networkScanStream =
+        NetworkAnalyzer.discover("192.168.1", port).map((x) {
+      scannedCounter++;
+      return x;
+    }).where((ip) => ip.exists);
   }
 
   @override
@@ -29,6 +33,14 @@ class _HomePageState extends State<HomePage> {
     widget.client.close();
     print("Disposing");
     super.dispose();
+  }
+
+  Future<String> checkIP(String ip) async {
+    var response = await http.get("http://$ip:$port/poll");
+    if (response.statusCode == 200) {
+      return response.body;
+    }
+    return null;
   }
 
   @override
@@ -41,10 +53,16 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.refresh),
             onPressed: () {
               setState(() {
-                scannedCounter = 0;
                 addresses.clear();
-                networkScanStream = NetworkAnalyzer.discover("192.168.1", 1337)
-                    .where((ip) => ip.exists);
+                scannedCounter = 0;
+                isLoading = true;
+                networkScanStream =
+                    NetworkAnalyzer.discover("192.168.1", port).map((x) {
+                  setState(() {
+                    scannedCounter++;
+                  });
+                  return x;
+                }).where((ip) => ip.exists);
               });
             },
           )
@@ -65,17 +83,11 @@ class _HomePageState extends State<HomePage> {
           // scannedCounter++;
           // Try to get hostname from server
           if (ip.hasData) {
-            try {
-              http
-                  .get("http://${ip.data.ip}:1337/poll")
-                  .then((http.Response response) {
-                if (response.statusCode == 200) {
-                  addresses.add(Computer(response.body, ip.data.ip));
-                }
-              });
-            } catch (ex) {
-              print("ERROR POLLING: " + ex);
-            }
+            checkIP(ip.data.ip).then((result) {
+              if (result != null) {
+                addresses.add(Computer(result, ip.data.ip));
+              }
+            });
           }
 
           // Display a list of the computers found
@@ -86,20 +98,33 @@ class _HomePageState extends State<HomePage> {
                 title: Text(computer.hostname),
                 subtitle: Text(computer.ip),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GameConfirmation(
-                        computer: computer,
+                  if (checkIP(computer.ip) == null) {
+                    var obj = addresses.where((x) {
+                      return x.ip == computer.ip;
+                    });
+                    addresses.remove(obj);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GameConfirmation(
+                          computer: computer,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
               );
             }).toList();
 
             if (isLoading) {
-              items.insert(0, LinearProgressIndicator());
+              items.insert(
+                  0, LinearProgressIndicator(value: scannedCounter / 255));
+              items.insert(
+                1,
+                Text("Scanning Your Local Network on Port $port",
+                    textAlign: TextAlign.center),
+              );
               // 0, LinearProgressIndicator(value: scannedCounter / 255));
             }
 
@@ -107,9 +132,17 @@ class _HomePageState extends State<HomePage> {
           }
 
           // Show the current scanning progress
-          return LinearProgressIndicator(
-              // value: scannedCounter / 255,
-              );
+          return Column(
+            children: <Widget>[
+              LinearProgressIndicator(
+                value: scannedCounter / 255,
+              ),
+              Text(
+                "Scanning Your Local Network on Port $port",
+                textAlign: TextAlign.center,
+              )
+            ],
+          );
         },
       ),
     );

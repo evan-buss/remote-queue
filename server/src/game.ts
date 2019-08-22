@@ -2,6 +2,15 @@ import * as robot from 'robotjs';
 import * as WebSocket from 'ws';
 import { ServerMessages } from './server';
 
+
+/** GameProfile stores info for each game type */
+export interface GameProfile {
+    name: string;
+    queueState: GameState;
+    successState: GameState;
+}
+
+
 export class GameState {
     x: number;
     y: number;
@@ -21,26 +30,28 @@ export class Game {
     loadDelay: number = 2000;
     userReacted: boolean = false;
     isWaiting: boolean = false;
-    NeutralState: GameState;
-    ReadyState: GameState;
-    SuccessState: GameState;
+    profile: GameProfile;
     timeToAccept: number;
     updateInterval: number;
 
-    constructor(ws: WebSocket) {
-        this.NeutralState = new GameState(78, 264, "ffffff");
-        this.ReadyState = new GameState(1053, 816, "53ad56");
-        this.SuccessState = new GameState(1449, 256, "fffffd");
-
+    constructor() {
         this.timeToAccept = 10;
         this.updateInterval = 1;
 
-        this.ws = ws;
         this._loopInterval = setInterval(this.loop, this.updateInterval * 1000);
     }
 
     stopLoop = (): void => {
         clearInterval(this._loopInterval);
+    }
+
+    setGame = (game: GameProfile): void => {
+        console.log("settings new profile");
+        this.profile = game;
+    }
+
+    setWS = (ws: WebSocket): void => {
+        this.ws = ws;
     }
 
     /** 
@@ -49,8 +60,8 @@ export class Game {
     */
     loop = (): void => {
         // Wait until queue pops
-        if (this.colorMatch(this.ReadyState.x, this.ReadyState.y, this.ReadyState.color)
-            && !this.isWaiting) {
+        if (!this.isWaiting && this.ws !== undefined && this.colorMatch(this.profile.queueState)) {
+            console.log("looping");
 
             this.ws.send(JSON.stringify({ "message": ServerMessages.GAME_READY, "body": this.timeToAccept }));
             this.poppedTime = Date.now();
@@ -74,13 +85,13 @@ export class Game {
 
         // Wait until the wait time ends, check if color has changed
         setTimeout(() => {
-            if (this.colorMatch(this.SuccessState.x, this.SuccessState.y, this.SuccessState.color)) {
+            if (this.colorMatch(this.profile.successState)) {
                 this.ws.send(JSON.stringify({ "message": ServerMessages.SUCCESS }));
             } else {
                 this.ws.send(JSON.stringify({ "message": ServerMessages.QUEUE_FAILED }));
 
-                // loop until neutral state is found
-                while (this.colorMatch(this.ReadyState.x, this.ReadyState.y, this.ReadyState.color)) {
+                // loop until queue button goes away
+                while (this.colorMatch(this.profile.queueState)) {
                     console.log("waiting for button to leave");
                 }
                 this.isWaiting = false;
@@ -88,7 +99,7 @@ export class Game {
         }, remaining + this.loadDelay);
 
         // Click the Button
-        robot.moveMouse(this.ReadyState.x, this.ReadyState.y);
+        robot.moveMouse(this.profile.queueState.x, this.profile.queueState.y);
         robot.mouseClick();
 
         this.ws.send(JSON.stringify({ "message": ServerMessages.QUEUE_WAIT }));
@@ -102,8 +113,9 @@ export class Game {
     /**
      * Check if the color at a given [x], [y] matches the [targetColor]
      */
-    colorMatch = (x: number, y: number, targetColor: string): boolean => {
-        let currentColor: string = robot.getPixelColor(x, y);
-        return targetColor == currentColor;
+    colorMatch = (state: GameState): boolean => {
+        let currentColor: string = robot.getPixelColor(state.x, state.y);
+        console.log("SERVER: " + currentColor + " vs " + state.color);
+        return state.color == currentColor;
     }
 }

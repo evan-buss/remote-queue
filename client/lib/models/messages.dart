@@ -1,4 +1,5 @@
 class ServerMessages {
+  static const String CONNECT = "CONNECT";
   static const String GAME_READY = "GAME_READY";
   static const String QUEUE_FAILED = "QUEUE_FAILED";
   static const String QUEUE_TIMEOUT = "QUEUE_TIMEOUT";
