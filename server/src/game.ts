@@ -1,19 +1,33 @@
 import * as robot from 'robotjs';
 import * as WebSocket from 'ws';
-import { Game, GameState, ServerMessages } from "./game";
+import { ServerMessages } from './server';
 
-export class CounterStrikeGlobalOffensive extends Game {
-    private ws: WebSocket;
-    private loopInterval: NodeJS.Timeout;
-    private poppedTime: number = 0;
-    // Delay to wait before checking for game load success
-    private loadDelay: number = 2000;
+export class GameState {
+    x: number;
+    y: number;
+    color: string;
 
-    private userReacted: boolean = false;
-    private isWaiting: boolean = false;
+    constructor(x: number, y: number, color: string) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+    };
+}
+
+export class Game {
+    ws: WebSocket;
+    _loopInterval: NodeJS.Timeout;
+    poppedTime: number = 0;
+    loadDelay: number = 2000;
+    userReacted: boolean = false;
+    isWaiting: boolean = false;
+    NeutralState: GameState;
+    ReadyState: GameState;
+    SuccessState: GameState;
+    timeToAccept: number;
+    updateInterval: number;
 
     constructor(ws: WebSocket) {
-        super();
         this.NeutralState = new GameState(78, 264, "ffffff");
         this.ReadyState = new GameState(1053, 816, "53ad56");
         this.SuccessState = new GameState(1449, 256, "fffffd");
@@ -22,11 +36,11 @@ export class CounterStrikeGlobalOffensive extends Game {
         this.updateInterval = 1;
 
         this.ws = ws;
-        this.loopInterval = setInterval(this.loop, this.updateInterval * 1000);
+        this._loopInterval = setInterval(this.loop, this.updateInterval * 1000);
     }
 
     stopLoop = (): void => {
-        clearInterval(this.loopInterval);
+        clearInterval(this._loopInterval);
     }
 
     /** 

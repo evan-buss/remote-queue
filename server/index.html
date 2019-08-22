@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Remote Queue Server</title>
+</head>
+
+<body>
+  <h1>Remote Queue Server</h1>
+
+  <!-- Server Controls -->
+  <button id="startBtn">Start</button>
+  <button id="stopBtn">Stop</button>
+
+  <!-- Info Message -->
+  <p id="info"></p>
+
+  <h2>Game Profile</h2>
+  <select name="games" id="games"></select>
+  <button id="saveBtn">Save Profile</button>
+  <button id="addBtn">Add Profile</button>
+
+  <h2>Profile Settings</h2>
+
+  <label for="queueBtn">
+    Queue State
+  </label>
+  <button id="queueBtn">Select Screen Position</button>
+  <p id="queueDetails"></p>
+  <br>
+  <label for="successBtn">
+    Success State
+  </label>
+  <button id="successBtn">Selection Screen Position</button>
+  <p id="successDetails"></p>
+
+</body>
+
+<script>
+  require('./dist/renderer.js');
+</script>
+
+</html>

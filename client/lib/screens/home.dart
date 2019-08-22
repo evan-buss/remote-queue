@@ -65,13 +65,17 @@ class _HomePageState extends State<HomePage> {
           // scannedCounter++;
           // Try to get hostname from server
           if (ip.hasData) {
-            http
-                .get("http://${ip.data.ip}:1337/poll")
-                .then((http.Response response) {
-              if (response.statusCode == 200) {
-                addresses.add(Computer(response.body, ip.data.ip));
-              }
-            });
+            try {
+              http
+                  .get("http://${ip.data.ip}:1337/poll")
+                  .then((http.Response response) {
+                if (response.statusCode == 200) {
+                  addresses.add(Computer(response.body, ip.data.ip));
+                }
+              });
+            } catch (ex) {
+              print("ERROR POLLING: " + ex);
+            }
           }
 
           // Display a list of the computers found
@@ -95,9 +99,8 @@ class _HomePageState extends State<HomePage> {
             }).toList();
 
             if (isLoading) {
-              items.insert(
-                  0, LinearProgressIndicator());
-                  // 0, LinearProgressIndicator(value: scannedCounter / 255));
+              items.insert(0, LinearProgressIndicator());
+              // 0, LinearProgressIndicator(value: scannedCounter / 255));
             }
 
             return ListView(children: items);
@@ -105,8 +108,8 @@ class _HomePageState extends State<HomePage> {
 
           // Show the current scanning progress
           return LinearProgressIndicator(
-            // value: scannedCounter / 255,
-          );
+              // value: scannedCounter / 255,
+              );
         },
       ),
     );

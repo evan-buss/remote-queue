@@ -1,31 +1,36 @@
 {
-  "name": "csgo_clicker",
+  "name": "electron-quick-start-typescript",
   "version": "1.0.0",
-  "description": "Accept game popup from your mobile phone",
-  "main": "index.js",
+  "description": "A minimal Electron application written with Typescript",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/tsc",
-    "dev:tsc": "./node_modules/.bin/tsc --watch",
-    "dev:src": "nodemon ./dist/server/index.js"
+    "build": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "npm run build && electron ./dist/main.js",
+    "native": "npm rebuild --runtime=electron --target=4.2.9 --disturl=https://atom.io/download/atom-shell --abi=68"
   },
+  "repository": "https://github.com/electron/electron-quick-start-typescript",
   "keywords": [
-    "node",
-    "csgo",
-    "web"
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo",
+    "typescript"
   ],
-  "author": "Evan Buss",
-  "license": "ISC",
+  "author": "GitHub",
+  "license": "CC0-1.0",
   "dependencies": {
-    "evilscan": "^1.7.5",
-    "express": "^4.17.1",
-    "express.io": "^1.1.13",
     "robotjs": "github:sidharth0094/robotjs#master",
+    "express": "^4.17.1",
     "ws": "^7.1.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.0",
+    "@types/node": "^12.7.2",
     "@types/ws": "^6.0.2",
+    "electron": "^4.2.9",
+    "electron-rebuild": "^1.8.6",
     "typescript": "^3.5.3"
   }
 }
