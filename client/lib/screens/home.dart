@@ -23,7 +23,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     networkScanStream = networkScanStream =
         NetworkAnalyzer.discover("192.168.1", port).map((x) {
-      scannedCounter++;
+      setState(() {
+        scannedCounter++;
+      });
       return x;
     }).where((ip) => ip.exists);
   }
@@ -41,6 +43,21 @@ class _HomePageState extends State<HomePage> {
       return response.body;
     }
     return null;
+  }
+
+  Widget _scanningProgress() {
+    // Show the current scanning progress
+    return Column(
+      children: <Widget>[
+        LinearProgressIndicator(
+          value: scannedCounter / 255,
+        ),
+        Text(
+          "Scanning Your Local Network on Port $port",
+          textAlign: TextAlign.center,
+        )
+      ],
+    );
   }
 
   @override
@@ -71,17 +88,16 @@ class _HomePageState extends State<HomePage> {
       body: StreamBuilder(
         stream: networkScanStream,
         builder: (BuildContext context, AsyncSnapshot<NetworkAddress> ip) {
+          // If the stream closes, hide loading progress.
           if (ip.connectionState == ConnectionState.done) {
-            print("DONE");
             isLoading = false;
             if (addresses.length == 0) {
               return Center(child: Text("Unable to locate your computer."));
             }
           }
 
-          // Increment each time a value is recieved
-          // scannedCounter++;
-          // Try to get hostname from server
+          // If ip is found, check to make sure it is running our server
+          // If it is, the request will return the computer's name.
           if (ip.hasData) {
             checkIP(ip.data.ip).then((result) {
               if (result != null) {
@@ -90,59 +106,41 @@ class _HomePageState extends State<HomePage> {
             });
           }
 
-          // Display a list of the computers found
+          // If atleast a single computer is found, construct a listview
           if (addresses.length > 0) {
+            // Return an array of ListTiles (one for each computer)
             var items = addresses.map<Widget>((Computer computer) {
               return ListTile(
                 leading: Icon(Icons.computer),
                 title: Text(computer.hostname),
                 subtitle: Text(computer.ip),
-                onTap: () {
-                  if (checkIP(computer.ip) == null) {
-                    var obj = addresses.where((x) {
-                      return x.ip == computer.ip;
-                    });
-                    addresses.remove(obj);
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GameConfirmation(
-                          computer: computer,
-                        ),
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GameConfirmation(
+                        computer: computer,
                       ),
-                    );
-                  }
+                    ),
+                  );
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Connection Closed"),
+                    ),
+                  );
                 },
               );
             }).toList();
 
+            // Only show progress bar if we are still scanning the network
             if (isLoading) {
-              items.insert(
-                  0, LinearProgressIndicator(value: scannedCounter / 255));
-              items.insert(
-                1,
-                Text("Scanning Your Local Network on Port $port",
-                    textAlign: TextAlign.center),
-              );
-              // 0, LinearProgressIndicator(value: scannedCounter / 255));
+              items.insert(0, _scanningProgress());
             }
 
             return ListView(children: items);
           }
 
-          // Show the current scanning progress
-          return Column(
-            children: <Widget>[
-              LinearProgressIndicator(
-                value: scannedCounter / 255,
-              ),
-              Text(
-                "Scanning Your Local Network on Port $port",
-                textAlign: TextAlign.center,
-              )
-            ],
-          );
+          return _scanningProgress();
         },
       ),
     );

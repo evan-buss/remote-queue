@@ -17,6 +17,7 @@ class GameConfirmation extends StatefulWidget {
 }
 
 class _GameConfirmationState extends State<GameConfirmation> {
+
   @override
   Widget build(BuildContext context) {
     print(widget.computer.ip);
