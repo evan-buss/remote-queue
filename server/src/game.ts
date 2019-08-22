@@ -63,7 +63,7 @@ export class Game {
         if (!this.isWaiting && this.ws !== undefined && this.colorMatch(this.profile.queueState)) {
             console.log("looping");
 
-            this.ws.send(JSON.stringify({ "message": ServerMessages.GAME_READY, "body": this.timeToAccept }));
+            this.ws.send(JSON.stringify({ "message": ServerMessages.GAME_READY, "body": this.timeToAccept.toString() }));
             this.poppedTime = Date.now();
             // Timeout the QUEUE if wait_time passes without user accepting
             setTimeout(() => {

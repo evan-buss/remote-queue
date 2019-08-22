@@ -11,22 +11,22 @@ let selectIndex: number = 0;
 let server: Server;
 let profiles: GameProfile[];
 
-
+// SERVER CONFIGURATION
 let startBtn = document.getElementById("startBtn");
 let stopBtn = document.getElementById("stopBtn");
 let portInput = <HTMLInputElement>document.getElementById("portInput");
-
 let info = document.getElementById("info");
 
+// PROFILES CONFIGURATION
 let gameSelect = <HTMLSelectElement>document.getElementById("games");
 let addBtn = document.getElementById("addBtn");
 let saveBtn = document.getElementById("saveBtn");
 let deleteBtn = document.getElementById("deleteBtn");
+
+// INDIDUAL PROFILE DETAILS
+let nameInput = <HTMLInputElement>document.getElementById("nameInput");
 let queueBtn = document.getElementById("queueBtn");
 let successBtn = document.getElementById("successBtn");
-
-
-let nameInput = <HTMLInputElement>document.getElementById("nameInput");
 let queueDetails = document.getElementById("queueDetails");
 let successDetails = document.getElementById("successDetails");
 
@@ -86,7 +86,9 @@ nameInput.addEventListener("input", () => {
 queueBtn.addEventListener("click", () => {
   getScreenData(3).then((val: GameState) => {
     profiles[selectIndex].queueState = val;
-    server.setGame(profiles[selectIndex]);
+    if (server !== undefined) {
+      server.setGame(profiles[selectIndex]);
+    }
     updateDisplays();
   });
 });
@@ -94,7 +96,9 @@ queueBtn.addEventListener("click", () => {
 successBtn.addEventListener("click", () => {
   getScreenData(3).then((val: GameState) => {
     profiles[selectIndex].successState = val;
-    server.setGame(profiles[selectIndex]);
+    if (server !== undefined) {
+      server.setGame(profiles[selectIndex]);
+    }
     updateDisplays();
   });
 });
@@ -140,13 +144,13 @@ function loadProfiles() {
  * Get color under mouse after [sec] seconds 
  */
 function getScreenData(sec: number): Promise<GameState> {
+  var audio = new Audio('./assets/camera_sound.wav');
+
   return new Promise((resolve, reject) => {
     setTimeout(() => {
+      audio.play();
       var { x, y } = robot.getMousePos();
-      console.log("\nMOUSE X: " + x + " Y: " + y);
-      console.log(robot.getPixelColor(x, y));
       var color = robot.getPixelColor(x, y);
-
       resolve(new GameState(x, y, color));
     }, sec * 1000);
   });
