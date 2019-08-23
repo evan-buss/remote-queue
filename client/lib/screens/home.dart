@@ -70,6 +70,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.refresh),
             onPressed: () {
               setState(() {
+                // Reset state and load again 
                 addresses.clear();
                 scannedCounter = 0;
                 isLoading = true;

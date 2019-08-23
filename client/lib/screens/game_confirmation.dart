@@ -19,7 +19,6 @@ class GameConfirmation extends StatefulWidget {
 class _GameConfirmationState extends State<GameConfirmation> {
   @override
   Widget build(BuildContext context) {
-    print(widget.computer.ip);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.computer.hostname),
@@ -34,7 +33,7 @@ class _GameConfirmationState extends State<GameConfirmation> {
           }
           return snapshot.hasData
               ? MessageHandler(snapshot.data, context, widget.channel)
-              : Text("no messages");
+              : Container();
         },
       ),
     );

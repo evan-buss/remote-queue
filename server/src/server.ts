@@ -32,7 +32,7 @@ export class Server {
     element: HTMLElement;
     game: Game;
 
-    constructor(port: string, connectionCallback: Function) {
+    constructor(port: string, connectionCallback: Function, disconnectCallback: Function) {
         this.port = port;
         this.app = express();
         this.server = http.createServer(this.app);
@@ -59,8 +59,9 @@ export class Server {
                 }
             });
             ws.on('close', (code: number, reason: string) => {
+                console.log("on close");
                 this.game.stopLoop();
-                console.log(`Closed connection. Code: ${code}`);
+                disconnectCallback(req.connection.remoteAddress);
             });
         });
 

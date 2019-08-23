@@ -6,6 +6,7 @@ import { ServerMessages } from './server';
 /** GameProfile stores info for each game type */
 export interface GameProfile {
     name: string;
+    queueDuration: number;
     queueState: GameState;
     successState: GameState;
 }
@@ -31,11 +32,12 @@ export class Game {
     userReacted: boolean = false;
     isWaiting: boolean = false;
     profile: GameProfile;
-    timeToAccept: number;
+    queueDuration: number;
     updateInterval: number;
+    timeRemaining: number;
 
     constructor() {
-        this.timeToAccept = 10;
+        this.queueDuration = 10;
         this.updateInterval = 1;
 
         this._loopInterval = setInterval(this.loop, this.updateInterval * 1000);
@@ -63,7 +65,7 @@ export class Game {
         if (!this.isWaiting && this.ws !== undefined && this.colorMatch(this.profile.queueState)) {
             console.log("looping");
 
-            this.ws.send(JSON.stringify({ "message": ServerMessages.GAME_READY, "body": this.timeToAccept.toString() }));
+            this.ws.send(JSON.stringify({ "message": ServerMessages.GAME_READY, "body": this.queueDuration.toString() }));
             this.poppedTime = Date.now();
             // Timeout the QUEUE if wait_time passes without user accepting
             setTimeout(() => {
@@ -71,7 +73,7 @@ export class Game {
                     this.ws.send(JSON.stringify({ "message": ServerMessages.QUEUE_TIMEOUT }));
                     this.stopLoop();
                 }
-            }, this.timeToAccept * 1000);
+            }, this.queueDuration * 1000);
         }
     }
 
@@ -79,9 +81,9 @@ export class Game {
 
         this.userReacted = true;
         this.isWaiting = true;
-        const remaining = (this.timeToAccept * 1000) - (Date.now() - this.poppedTime); // divide by 1000 for seconds
+        this.timeRemaining = (this.queueDuration * 1000) - (Date.now() - this.poppedTime); // divide by 1000 for seconds
 
-        console.log("REMAINING: " + remaining);
+        console.log("REMAINING: " + this.timeRemaining);
 
         // Wait until the wait time ends, check if color has changed
         setTimeout(() => {
@@ -96,7 +98,7 @@ export class Game {
                 }
                 this.isWaiting = false;
             }
-        }, remaining + this.loadDelay);
+        }, this.timeRemaining + this.loadDelay);
 
         // Click the Button
         robot.moveMouse(this.profile.queueState.x, this.profile.queueState.y);
