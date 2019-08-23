@@ -38,7 +38,7 @@ window.onload = loadProfiles;
 saveBtn.addEventListener("click", () => {
   fs.writeFile(os.homedir() + "/.rqProfiles", JSON.stringify(profiles), (err) => {
     if (err) {
-      return console.log(err);
+      return console.log("Error Saving Profile: " + err);
     }
   })
 });
@@ -110,12 +110,16 @@ startBtn.addEventListener("click", () => {
   server = new Server(portInput.value);
   server.setGame(profiles[selectIndex]);
   server.startServer();
-  info.innerHTML = "Server Started";
+  info.innerText = "Server Started";
+  info.classList.add("is-success")
+  info.classList.remove("is-danger")
 });
 
 stopBtn.addEventListener("click", () => {
   server.stopServer();
-  info.innerHTML = "Server Stopped";
+  info.innerText = "Server Stopped";
+  info.classList.add("is-danger")
+  info.classList.remove("is-success")
 });
 
 

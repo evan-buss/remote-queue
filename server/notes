@@ -46,7 +46,7 @@ Game Class
             - Alert user
 
 Necessary Game Client States
-    No Queue State
+    No Queue State (NOT CURRENTLY USED)
         - Client is not currently in the queue
     Queue Popped State
         - Queue accept button is visible

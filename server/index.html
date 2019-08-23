@@ -4,51 +4,110 @@
 <head>
   <meta charset="UTF-8">
   <title>Remote Queue Server</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <link rel="stylesheet" type="text/css" href="./node_modules/bulma/css/bulma.min.css" />
 </head>
 
 <body>
-  <h1>Remote Queue Server</h1>
+
 
   <!-- Server Controls -->
-  <button id="startBtn">Start</button>
-  <button id="stopBtn">Stop</button>
-  <br>
-  <br>
-  <label for="nameInput">
-    Server Port
-  </label>
-  <input type="text" id="portInput" value="1337" />
 
-  <!-- Info Message -->
-  <p id="info"></p>
+  <div class="columns is-mobile">
+    <div class="column">
+      <h1 class="title">Remote Queue Server</h1>
+      <button class="button is-success is-medium" id="startBtn">Start</button>
+      <button class="button is-danger is-medium" id="stopBtn">Stop</button>
+      <div class="field">
+        <label class="label">
+          Server Port
+        </label>
+        <div class="control">
+          <input class="input" type="text" id="portInput" value="1337" />
+        </div>
+        <div class="help">Set a port for the server to listen on.</div>
+      </div>
+      <div id="info" class="notification">Server Not Running</div>
+    </div>
+    <div class="column is-half">
+      <!-- Info Message -->
 
-  <h2>Game Profile</h2>
-  <select name="games" id="games"></select>
-  <button id="saveBtn">Save Profile</button>
-  <button id="addBtn">Add Profile</button>
-  <button id="deleteBtn">Delete Profile</button>
 
-  <h2>Profile Settings</h2>
+      <h2 class="title">Game Profile</h2>
+      <div class="field">
 
-  <label for="nameInput">
-    Profile Name
-  </label>
-  <input type="text" id="nameInput"></input>
-  <br>
-  <br>
+      </div>
 
-  <label for="queueBtn">
-    Queue State
-  </label>
-  <button id="queueBtn">Select Screen Position</button>
-  <p id="queueDetails"></p>
-  <br>
-  <label for="successBtn">
-    Success State
-  </label>
-  <button id="successBtn">Selection Screen Position</button>
-  <p id="successDetails"></p>
+      <div class="field is-grouped is-centered">
+        <label class="label">Active Game</label>
+        <p class="control has-icons-left">
+          <span class="select">
+            <select name="games" id="games"></select>
+          </span>
+          <span class="icon is-small is-left">
+            <i class="fas fa-gamepad"></i>
+          </span>
+        </p>
+      </div>
 
+      <div>
+        <button class="button is-success" id="saveBtn">Save</button>
+        <button class="button is-primary" id="addBtn">New</button>
+        <button class="button is-danger" id="deleteBtn">Delete</button>
+      </div>
+
+
+      <h2 class="title">Profile Settings</h2>
+
+      <div class="field is-horizontal">
+        <div class="field-label is-normal">
+          <label class="label">Profile Name</label>
+        </div>
+        <div class="field-body">
+          <div class="control">
+            <input class="input" type="text" id="nameInput"></input>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="tile is-ancestor">
+        <div class="tile is-parent is-4">
+          <div class="tile is-child box">
+            <div class="field">
+              <label for="" class="label">Queue State</label>
+              <div class="control">
+                <!-- <button class="button is-primary is-outlined" id="queueBtn">Select Location</button> -->
+                <a id="queueBtn" class="button is-primary is-outlined">
+                  <span class="icon">
+                    <i class="fas fa-crosshairs"></i>
+                  </span>
+                  <span>Select Location</span>
+                </a>
+              </div>
+              <p id="queueDetails"></p>
+            </div>
+          </div>
+          <div class="tile is-child box">
+            <div class="field">
+              <label for="" class="label">Success State</label>
+              <div class="control">
+                <!-- <button class="button is-primary is-outlined" id="successBtn">Select Location</button> -->
+                <a id="successBtn" class="button is-primary is-outlined">
+                  <span class="icon">
+                    <i class="fas fa-crosshairs"></i>
+                  </span>
+                  <span>Select Location</span>
+                </a>
+              </div>
+              <p id="successDetails"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 <script>

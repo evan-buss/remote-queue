@@ -1,0 +1,9 @@
+Features
+  Package desktop app
+
+Improvements
+  - Design
+    - Make client app messages look better.
+    - Add CSS to desktop app
+
+  - Clean up server code.
