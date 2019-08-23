@@ -32,15 +32,15 @@ export class Server {
     element: HTMLElement;
     game: Game;
 
-    constructor(port: string) {
+    constructor(port: string, connectionCallback: Function) {
         this.port = port;
         this.app = express();
         this.server = http.createServer(this.app);
         this.wss = new WebSocket.Server({ server: this.server });
         this.game = new Game();
 
-        this.wss.on('connection', (ws: WebSocket) => {
-            console.log("PROFILE: " + this.game.profile.name);
+        this.wss.on('connection', (ws: WebSocket, req: http.IncomingMessage) => {
+            connectionCallback(req.connection.remoteAddress);
 
             ws.send(JSON.stringify({ "message": ServerMessages.CONNECT, "body": this.game.profile.name }))
             this.game.setWS(ws);

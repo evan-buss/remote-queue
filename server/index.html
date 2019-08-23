@@ -9,39 +9,30 @@
   <link rel="stylesheet" type="text/css" href="./node_modules/bulma/css/bulma.min.css" />
 </head>
 
-<body>
+<body style="overflow: hidden;">
+  <div class="columns">
 
+    <!-- Left Aligned Column -->
+    <div class="column" style="margin-left: 10px;">
 
-  <!-- Server Controls -->
-
-  <div class="columns is-mobile">
-    <div class="column">
-      <h1 class="title">Remote Queue Server</h1>
-      <button class="button is-success is-medium" id="startBtn">Start</button>
-      <button class="button is-danger is-medium" id="stopBtn">Stop</button>
+      <!-- Server Controls / Settings -->
+      <h1 class="title has-text-centered">Remote Queue Server</h1>
+      <div id="serverBtns" style="display: flex; flex-flow: row nowrap; justify-content: center; margin: 16px;">
+        <button class="button is-success is-medium" id="startBtn" style="margin-right: 28px;">Start</button>
+        <button class="button is-danger is-medium" id="stopBtn">Stop</button>
+      </div>
       <div class="field">
-        <label class="label">
-          Server Port
-        </label>
+        <label class="label">Server Port</label>
         <div class="control">
           <input class="input" type="text" id="portInput" value="1337" />
         </div>
-        <div class="help">Set a port for the server to listen on.</div>
       </div>
       <div id="info" class="notification">Server Not Running</div>
-    </div>
-    <div class="column is-half">
-      <!-- Info Message -->
 
-
-      <h2 class="title">Game Profile</h2>
+      <!-- Profiles Management Controls -->
+      <h2 class="title">Active Game Profile</h2>
       <div class="field">
-
-      </div>
-
-      <div class="field is-grouped is-centered">
-        <label class="label">Active Game</label>
-        <p class="control has-icons-left">
+        <p class="control has-icons-left is-expanded">
           <span class="select">
             <select name="games" id="games"></select>
           </span>
@@ -50,59 +41,101 @@
           </span>
         </p>
       </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-success" id="saveBtn">Save</button>
+        </div>
+        <div class="control">
 
-      <div>
-        <button class="button is-success" id="saveBtn">Save</button>
-        <button class="button is-primary" id="addBtn">New</button>
-        <button class="button is-danger" id="deleteBtn">Delete</button>
+          <button class="button is-primary" id="addBtn">New</button>
+        </div>
+        <div class="control">
+
+          <button class="button is-danger" id="deleteBtn">Delete</button>
+        </div>
       </div>
+    </div>
 
+    <!-- Selected Profile Settings -->
+    <div class="column" style="margin-right: 20px;">
 
       <h2 class="title">Profile Settings</h2>
 
-      <div class="field is-horizontal">
-        <div class="field-label is-normal">
-          <label class="label">Profile Name</label>
+      <!-- Selected Profile Name Input -->
+      <div class="field">
+        <label class="label">Name</label>
+        <div class="control">
+          <input class="input" type="text" id="nameInput"></input>
         </div>
-        <div class="field-body">
-          <div class="control">
-            <input class="input" type="text" id="nameInput"></input>
+      </div>
+
+      <!-- State Selection Delay -->
+      <div class="field">
+        <label class="label">Selection Delay (seconds)</label>
+        <div class="control">
+          <input class="input" type="text" id="delayInput" value="3"></input>
+        </div>
+      </div>
+
+      <!-- Queue State Configuration -->
+      <div class="columns box is-mobile" style="margin-top: 10px; margin-bottom: 20px;">
+        <div class="column">
+          <div class="field">
+            <label for="" class="label">Queue State</label>
+            <div class="control">
+              <a id="queueBtn" class="button is-primary is-outlined">
+                <span class="icon">
+                  <i class="fas fa-crosshairs"></i>
+                </span>
+                <span>Select Location</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field is-horizontal">
+            <label for="queueX" class="label">X: </label>
+            <p id="queueX"></p>
+          </div>
+          <div class="field is-horizontal">
+            <label for="queueY" class="label">Y: </label>
+            <p id="queueY"></p>
+          </div>
+          <div class="field is-horizontal">
+            <label for="queueColor" class="label">Color: </label>
+            <div id="queueColor" style="width: 80px; height: 28px; border: 1px solid gray; text-align: center;"></div>
           </div>
         </div>
       </div>
 
-
-      <div class="tile is-ancestor">
-        <div class="tile is-parent is-4">
-          <div class="tile is-child box">
-            <div class="field">
-              <label for="" class="label">Queue State</label>
-              <div class="control">
-                <!-- <button class="button is-primary is-outlined" id="queueBtn">Select Location</button> -->
-                <a id="queueBtn" class="button is-primary is-outlined">
-                  <span class="icon">
-                    <i class="fas fa-crosshairs"></i>
-                  </span>
-                  <span>Select Location</span>
-                </a>
-              </div>
-              <p id="queueDetails"></p>
+      <!-- Success State Configuration -->
+      <div class="columns box is-mobile">
+        <div class="column is-half">
+          <div class="field">
+            <label for="" class="label">Success State</label>
+            <div class="control">
+              <a id="successBtn" class="button is-primary is-outlined">
+                <span class="icon">
+                  <i class="fas fa-crosshairs"></i>
+                </span>
+                <span>Select Location</span>
+              </a>
             </div>
           </div>
-          <div class="tile is-child box">
-            <div class="field">
-              <label for="" class="label">Success State</label>
-              <div class="control">
-                <!-- <button class="button is-primary is-outlined" id="successBtn">Select Location</button> -->
-                <a id="successBtn" class="button is-primary is-outlined">
-                  <span class="icon">
-                    <i class="fas fa-crosshairs"></i>
-                  </span>
-                  <span>Select Location</span>
-                </a>
-              </div>
-              <p id="successDetails"></p>
-            </div>
+        </div>
+
+        <div class="column is-half">
+          <div class="field is-horizontal">
+            <label for="successX" class="label">X: </label>
+            <p id="successX"></p>
+          </div>
+          <div class="field is-horizontal">
+            <label for="successX" class="label">Y: </label>
+            <p id="successY"></p>
+          </div>
+          <div class="field is-horizontal">
+            <label for="successColor" class="label">Color: </label>
+            <div id="successColor" style="width: 80px; height: 28px; border: 1px solid gray; text-align: center"></div>
           </div>
         </div>
       </div>

@@ -9,7 +9,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true
     },
-    height: 600,
+    autoHideMenuBar: true,
+    height: 610,
     width: 800,
   });
 
@@ -18,6 +19,7 @@ function createWindow() {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+  mainWindow.setResizable(false);
 
   // Emitted when the window is closed.
   mainWindow.on("closed", () => {
