@@ -23,8 +23,14 @@ need to set them up once. Settings are stored in JSON format to `~/.rqProfiles`
 - The mobile app is written in Flutter which allows it to work on both iOS and Android
 - Using Dart's multithreading paradigm "Isolates", your local network is traversed and seached for the specified open port that you set. Once the port is found, the app attempts to send a GET request to `/poll`. The request returns the computer's hostname if it is running the server.
 - It then establishes a websocket connection which allows realtime data to be passed between the app and the server.
+<p float="left">
+<img src="https://raw.githubusercontent.com/evan-buss/remote-queue/master/assets/screenshots/net_scan.jpg" alt="Network Scan" height="500px">
+<img src="https://raw.githubusercontent.com/evan-buss/remote-queue/master/assets/screenshots/in_queue.jpg" alt="In Queue" height="500px">
+<img src="https://raw.githubusercontent.com/evan-buss/remote-queue/master/assets/screenshots/accept_game.jpg" alt="accept game prompt" height="500px">
+</p>
 
 ## Desktop Client / Server
 - The server is written in JavaScript using Node.js
 - It makes use of Robots.js to manipulate the mouse and keyboard, as well as see what is on the screen.
 - The desktop client uses Electron. The client allows you to adjusts the server's settings as well as save and load specific game profiles.
+<img src="https://raw.githubusercontent.com/evan-buss/remote-queue/master/assets/screenshots/server_gui.png" alt="desktop server" height="500px">
