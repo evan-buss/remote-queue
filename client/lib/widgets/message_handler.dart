@@ -20,14 +20,40 @@ class MessageHandler extends StatefulWidget {
 }
 
 class _MessageHandlerState extends State<MessageHandler> {
+  Widget _messageCard(String message, {String subMessage}) {
+    return Center(
+      child: Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(28),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(width: 1, color: Colors.teal)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                message,
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              subMessage.isNotEmpty
+                  ? Text(
+                      subMessage,
+                      style:
+                          TextStyle(fontSize: 28, fontWeight: FontWeight.w300),
+                      textAlign: TextAlign.center,
+                    )
+                  : Container(),
+            ],
+          )),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     switch (widget.response.message) {
       case ServerMessages.CONNECT:
-        return Text("In Queue for ${widget.response.body}",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).primaryTextTheme.display2);
-
+        return _messageCard("In Queue ", subMessage: "${widget.response.body}");
       case ServerMessages.GAME_READY:
         return Center(
           child: Column(
@@ -71,29 +97,16 @@ class _MessageHandlerState extends State<MessageHandler> {
           ),
         );
       case ServerMessages.SUCCESS:
-        return Center(
-          child: Text("You've Successfully Accepted The Game",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).primaryTextTheme.display2),
-        );
+        return _messageCard("Game Accepted", subMessage: "Hurry back...");
       case ServerMessages.QUEUE_WAIT:
-        return Center(
-          child: Text("Waiting for Others to Accept",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).primaryTextTheme.display2),
-        );
+        return _messageCard("You've Accepted the Queue",
+            subMessage: "Waiting for others...u");
       case ServerMessages.QUEUE_TIMEOUT:
-        return Center(
-          child: Text("You Missed the Queue",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).primaryTextTheme.display2),
-        );
+        return _messageCard("Queue Missed",
+            subMessage: "Please return to computer.");
       case ServerMessages.QUEUE_FAILED:
-        return Center(
-          child: Text("Not all players accepted the queue. Going Again",
-              textAlign: TextAlign.center,
-              style: Theme.of(context).primaryTextTheme.display2),
-        );
+        return _messageCard("Not Everyone Accepted",
+            subMessage: "Waiting for the next one.");
       default:
         return Center(child: CircularProgressIndicator());
     }

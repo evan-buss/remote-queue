@@ -40,11 +40,15 @@ export class Game {
         this.queueDuration = 10;
         this.updateInterval = 1;
 
-        this._loopInterval = setInterval(this.loop, this.updateInterval * 1000);
+        // this.startLoop();
     }
 
     stopLoop = (): void => {
         clearInterval(this._loopInterval);
+    }
+
+    startLoop = (): void => {
+        this._loopInterval = setInterval(this.loop, this.updateInterval * 1000);
     }
 
     setGame = (game: GameProfile): void => {
@@ -61,6 +65,7 @@ export class Game {
      * if
     */
     loop = (): void => {
+        console.log("LOOPING");
         // Wait until queue pops
         if (!this.isWaiting && this.ws !== undefined && this.colorMatch(this.profile.queueState)) {
             console.log("looping");

@@ -19,60 +19,59 @@ class IsolateParams {
 
 /// NetworkScanner cotains network scanning functions
 class NetworkScanner {
-  /// scanNetwork searchs the given [subnet] for the given [port]
-  static Future<List<String>> scanNetwork(String subnet, int port) async {
+  /// scanNetwork searchs the given [subnet] for the open [port]
+  static Stream<String> scanNetwork(String subnet, int port) {
     final isolateCount = 5; // # of isolates to be spawned
 
     List<Isolate> isolates = List(isolateCount);
     List<ReceivePort> ports = List(isolateCount);
 
-    List<String> results = List();
+    IsolateParams params;
     int doneCounter = 0;
-    Completer<List<String>> _completer = new Completer();
+    StreamController<String> controller = StreamController<String>();
 
     if (port < 1 || port > 65535) {
-      _completer.completeError(throw "Invalid port number");
+      controller.addError("Invalid Port Number");
     }
 
     // Create isolates to search pieces of the subnet concurrently
     for (int i = 0; i < isolateCount; i++) {
       ports[i] = ReceivePort();
       if (i == 0) {
-        isolates[i] = await Isolate.spawn(
-          _scanPartial,
-          IsolateParams(i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort),
-        );
+        params =
+            IsolateParams(i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort);
       } else {
-        isolates[i] = await Isolate.spawn(
-          _scanPartial,
-          IsolateParams(i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort),
-        );
+        params = IsolateParams(
+            i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort);
       }
-
-      // Each isolate sends "DONE" when finished processing.
-      isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
+      // Spawn the isolate with the given params
+      Isolate.spawn(_scanPartial, params).then((isolate) {
+        isolates[i] = isolate;
+        // Each isolate sends "DONE" when finished processing.
+        isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
+      });
 
       // Listen for data from each isolate.
       ports[i].listen((data) {
         if (data != "DONE") {
-          results.add(data);
+          controller.add(data);
         } else {
           doneCounter++;
           ports[i].close();
           // Wait for all isolates to finish, then return results
           if (doneCounter == isolateCount) {
-            _completer.complete(results);
+            controller.close();
           }
         }
       });
     }
-    return _completer.future;
+    return controller.stream;
   }
 
   /// _scanPartial is responsible for scanning a subsection of the subnet
   static _scanPartial(IsolateParams params) async {
     for (int i = params.start; i <= params.end; ++i) {
-      final host = '192.168.1.$i';
+      final host = '${params.subnet}.$i';
 
       try {
         final Socket s = await Socket.connect(host, params.port,

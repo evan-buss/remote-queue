@@ -44,6 +44,7 @@ export class Server {
 
             ws.send(JSON.stringify({ "message": ServerMessages.CONNECT, "body": this.game.profile.name }))
             this.game.setWS(ws);
+            this.game.startLoop();
 
             ws.on('message', (message: String) => {
                 // Handle incoming messages

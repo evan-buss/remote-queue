@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:client/models/computer.dart';
 import 'package:client/screens/game_confirmation.dart';
 import 'package:client/util/net_isolate.dart';
@@ -12,21 +14,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Set<Computer> addresses = Set<Computer>();
-  int scannedCounter = 0;
-  bool isLoading = false;
+  Set<Computer> addresses = Set<Computer>();
+  bool isLoading = true;
   int port = 1337;
-  List<String> addresses = List();
+  Stream<String> netStream;
 
   @override
   void initState() {
     super.initState();
-    // scanNetwork(port).then((result) {
-    //   setState(() {
-    //     isLoading = false;
-    //     addresses = result;
-    //   });
-    // });
+    netStream = NetworkScanner.scanNetwork("192.168.1", port);
   }
 
   @override
@@ -36,11 +32,13 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<String> checkIP(String ip) async {
-    var response = await http.get("http://$ip:$port/poll");
-    if (response.statusCode == 200) {
-      return response.body;
-    }
+  Future<Computer> checkIP(String ip) async {
+    try {
+      var response = await http.get("http://$ip:$port/poll");
+      if (response.statusCode == 200) {
+        return Computer(response.body, ip, port: port.toString());
+      }
+    } on SocketException {} // Expected error, ignore exception
     return null;
   }
 
@@ -49,9 +47,12 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: <Widget>[
         LinearProgressIndicator(),
-        Text(
-          "Scanning Your Local Network on Port $port",
-          textAlign: TextAlign.center,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "Scanning Your Local Network on Port $port",
+            textAlign: TextAlign.center,
+          ),
         )
       ],
     );
@@ -69,29 +70,68 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 addresses.clear();
                 isLoading = true;
-              });
-
-              print(port);
-              var result = await scanNetwork(port);
-              print(result);
-              setState(() {
-                isLoading = false;
-                addresses = result;
+                netStream = NetworkScanner.scanNetwork("192.168.1", port);
               });
             },
           )
         ],
       ),
-      body: ListView(
-        children: addresses.map<Widget>((String x) {
-          return ListTile(
-            title: Text(x),
-          );
-        }).toList()
-          ..insert(
-            0,
-            isLoading ? _scanningProgress() : Container(),
-          ),
+      body: StreamBuilder(
+        stream: netStream,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          // Check to see if the open port is actually running the server
+          if (snapshot.hasData) {
+            checkIP(snapshot.data).then((computer) {
+              if (computer != null) {
+                addresses.add(computer);
+              }
+            });
+          }
+          // Generate a ListTile for each computer found
+          var items = addresses.map<Widget>(
+            (computer) {
+              return ListTile(
+                leading: Icon(Icons.computer),
+                title: Text(computer.hostname),
+                subtitle: Text(computer.ip),
+                onTap: () async {
+                  if (await checkIP(computer.ip) != null) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GameConfirmation(
+                          computer: computer,
+                        ),
+                      ),
+                    );
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Connection Closed"),
+                      ),
+                    );
+                  } else {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Unable to connect to computer."),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ).toList();
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            isLoading = false;
+            if (addresses.length == 0) {
+              return Center(child: Text("Unable to locate your computer."));
+            }
+          } else {
+            items.insert(0, _scanningProgress());
+          }
+
+          return ListView(children: items);
+        },
       ),
     );
   }
