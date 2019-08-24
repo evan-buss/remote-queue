@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Set<Computer> addresses = Set<Computer>();
   bool isLoading = true;
-  int port = 1337;
+  int port = 5001;
   Stream<String> netStream;
 
   @override

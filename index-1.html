@@ -1,0 +1,27 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Unknown </title></head><body>
+<h1 id="remote-queue">Remote Queue</h1>
+<p>Allows you to confirm a game from your mobile device when you are away from your
+PC.</p>
+<h2 id="how-it-works">How it Works</h2>
+<ol>
+<li>Run the server on your PC with the game open and waiting in queue</li>
+<li>Open the mobile app while connected to the same local network as the PC</li>
+<li>Choose your PC from the list of available devices.</li>
+<li>Wait for the notification that you must accept the game</li>
+<li>Click the accept button and it will be accepted on your PC</li>
+</ol>
+<h2 id="game-support">Game Support</h2>
+<p>I currently only plan on supporting Counter Strike: Global Offensive. I hope to 
+develop the application in such a way that adding support for new games is trivial.</p>
+<h2 id="tech">Tech</h2>
+<h3 id="mobile-app">Mobile App</h3>
+<ul>
+<li>The mobile app is written in Flutter which allows it to work on both iOS and Android</li>
+<li>It makes use of websockets to send and recieve data from the server.</li>
+</ul>
+<h3 id="server">Server</h3>
+<ul>
+<li>The server is written in JavaScript using Node.js</li>
+<li>It makes use of Robots.js to manipulate the mouse and keyboard, as well as see what is on the screen.</li>
+</ul>
+</body></html>
