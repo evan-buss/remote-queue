@@ -76,8 +76,8 @@ function loadProfiles() {
 // ================================
 saveBtn.onclick = saveProfiles;
 gameSelect.onchange = switchActiveGame;
-addBtn.click = createProfile;
-deleteBtn.click = deleteProfile;
+addBtn.onclick = createProfile;
+deleteBtn.onclick = deleteProfile;
 
 // Save all changes to file located at ~/.rqProfiles
 function saveProfiles() {

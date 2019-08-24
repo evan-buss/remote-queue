@@ -22,6 +22,17 @@ class _GameConfirmationState extends State<GameConfirmation> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.computer.hostname),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("DISCONNECT"),
+            onPressed: () {
+              setState(() {
+                widget.channel.sink.close(status.normalClosure);
+                Navigator.pop(context);
+              });
+            },
+          )
+        ],
       ),
       body: StreamBuilder(
         stream: widget.channel.stream,
