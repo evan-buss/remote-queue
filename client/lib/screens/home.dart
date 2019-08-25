@@ -8,18 +8,19 @@ import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final client = new http.Client();
+  final Set<Computer> addresses = Set<Computer>();
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  Set<Computer> addresses = Set<Computer>();
-  bool isLoading = true;
   int port = 5001;
-  TextEditingController controller = TextEditingController();
-
+  bool isLoading = true;
   Stream<String> netStream;
+  final TextEditingController controller = TextEditingController();
+
+  String errorString = "Unable to locate your computer.";
 
   @override
   void initState() {
@@ -29,24 +30,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    super.dispose();
     widget.client.close();
     controller.dispose();
     print("Disposing");
-    super.dispose();
   }
 
+  /// checkIP checks if the found IP is actually running the server.
+  /// Returns a new [Computer] if so, otherwise returns null
   Future<Computer> checkIP(String ip) async {
     try {
       var response = await http.get("http://$ip:$port/poll");
       if (response.statusCode == 200) {
         return Computer(response.body, ip, port: port.toString());
       }
-    } on SocketException {} // Expected error, ignore exception
+    } catch (ex) {
+      print("GET error");
+    } // Expected error, ignore exception
     return null;
   }
 
+  // Loading Indicator
   Widget _scanningProgress() {
-    // Show the current scanning progress
     return Column(
       children: <Widget>[
         LinearProgressIndicator(),
@@ -62,13 +67,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Show a ModalBottomSheet to change port number
   void _changePort() async {
     controller.text = port.toString();
-    var newPort = await showModalBottomSheet<int>(
+    await showModalBottomSheet<int>(
       context: context,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16), topRight: Radius.circular(16))),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       builder: (context) {
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -97,8 +106,7 @@ class _HomePageState extends State<HomePage> {
                   RaisedButton(
                     child: Text("SAVE"),
                     onPressed: () {
-                      Navigator.pop(
-                          context, int.parse(controller.text ?? null));
+                      Navigator.pop(context);
                     },
                   )
                 ],
@@ -112,19 +120,23 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+
     setState(() {
-      port = newPort ?? port;
+      print("setting port");
+      port = int.parse(controller.text) ?? port;
+      print(port.toString());
+      netStream = NetworkScanner.scanNetwork("192.168.1", port);
     });
   }
 
   Future<String> _reload() {
     setState(() {
-      addresses.clear();
+      widget.addresses.clear();
       isLoading = true;
       netStream = NetworkScanner.scanNetwork("192.168.1", port);
     });
 
-    return Future.value("DONE");
+    return Future.value("RELOAD");
   }
 
   @override
@@ -146,16 +158,21 @@ class _HomePageState extends State<HomePage> {
         child: StreamBuilder(
           stream: netStream,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            //  Stop loading on error
+            if (snapshot.hasError) {
+              isLoading = false;
+              errorString = snapshot.error.toString();
+            }
             // Check to see if the open port is actually running the server
             if (snapshot.hasData) {
               checkIP(snapshot.data).then((computer) {
                 if (computer != null) {
-                  addresses.add(computer);
+                  widget.addresses.add(computer);
                 }
               });
             }
             // Generate a ListTile for each computer found
-            var items = addresses.map<Widget>(
+            var items = widget.addresses.map<Widget>(
               (computer) {
                 return ListTile(
                   leading: Icon(Icons.computer),
@@ -190,13 +207,14 @@ class _HomePageState extends State<HomePage> {
 
             if (snapshot.connectionState == ConnectionState.done) {
               isLoading = false;
-              if (addresses.length == 0) {
+              if (widget.addresses.length == 0) {
+                errorString = "Unable to locate your computer.";
                 return ListView(
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.all(16),
                       child: Text(
-                        "Unable to locate your computer.",
+                        errorString,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w300),

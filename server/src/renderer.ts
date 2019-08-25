@@ -57,7 +57,8 @@ function loadProfiles() {
       opt.innerHTML = "Unamed Profile";
       gameSelect.appendChild(opt);
     } else {
-      profiles = JSON.parse(data);
+      profiles = JSON.parse(data)["profiles"];
+      portInput.value = JSON.parse(data)["port"];
       console.log(profiles.length);
       for (var i = 0; i < profiles.length; i++) {
         let opt = document.createElement('option');
@@ -81,11 +82,12 @@ deleteBtn.onclick = deleteProfile;
 
 // Save all changes to file located at ~/.rqProfiles
 function saveProfiles() {
-  fs.writeFile(os.homedir() + "/.rqProfiles", JSON.stringify(profiles), (err) => {
-    if (err) {
-      return console.log("Error Saving Profile: " + err);
-    }
-  });
+  fs.writeFile(os.homedir() + "/.rqProfiles",
+    JSON.stringify({ "port": portInput.value, "profiles": profiles }), (err) => {
+      if (err) {
+        return console.log("Error Saving Profile: " + err);
+      }
+    });
 }
 
 
