@@ -9,7 +9,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Wireless Game Confirmation',
+      title: 'Remote Queue',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
       routes: {
         '/': (context) => HomePage(),

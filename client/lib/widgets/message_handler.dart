@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:vibrate/vibrate.dart';
 import 'package:client/models/messages.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
@@ -23,29 +24,29 @@ class _MessageHandlerState extends State<MessageHandler> {
   Widget _messageCard(String message, {String subMessage}) {
     return Center(
       child: Container(
-          margin: EdgeInsets.all(10),
-          padding: EdgeInsets.all(28),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(width: 1, color: Colors.teal)),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                message,
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              subMessage.isNotEmpty
-                  ? Text(
-                      subMessage,
-                      style:
-                          TextStyle(fontSize: 28, fontWeight: FontWeight.w300),
-                      textAlign: TextAlign.center,
-                    )
-                  : Container(),
-            ],
-          )),
+        margin: EdgeInsets.all(10),
+        padding: EdgeInsets.all(28),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(width: 1, color: Colors.teal)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              message,
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            subMessage.isNotEmpty
+                ? Text(
+                    subMessage,
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w300),
+                    textAlign: TextAlign.center,
+                  )
+                : Container(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -55,6 +56,8 @@ class _MessageHandlerState extends State<MessageHandler> {
       case ServerMessages.CONNECT:
         return _messageCard("In Queue ", subMessage: "${widget.response.body}");
       case ServerMessages.GAME_READY:
+        Vibrate.vibrate();
+
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -100,7 +103,7 @@ class _MessageHandlerState extends State<MessageHandler> {
         return _messageCard("Game Accepted", subMessage: "Hurry back...");
       case ServerMessages.QUEUE_WAIT:
         return _messageCard("You've Accepted the Queue",
-            subMessage: "Waiting for others...u");
+            subMessage: "Waiting for others...");
       case ServerMessages.QUEUE_TIMEOUT:
         return _messageCard("Queue Missed",
             subMessage: "Please return to computer.");

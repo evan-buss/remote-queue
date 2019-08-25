@@ -17,6 +17,8 @@ class _HomePageState extends State<HomePage> {
   Set<Computer> addresses = Set<Computer>();
   bool isLoading = true;
   int port = 5001;
+  TextEditingController controller = TextEditingController();
+
   Stream<String> netStream;
 
   @override
@@ -28,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     widget.client.close();
+    controller.dispose();
     print("Disposing");
     super.dispose();
   }
@@ -50,12 +53,78 @@ class _HomePageState extends State<HomePage> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            "Scanning Your Local Network on Port $port",
+            "Scanning Network Port: $port",
             textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
           ),
         )
       ],
     );
+  }
+
+  void _changePort() async {
+    controller.text = port.toString();
+    var newPort = await showModalBottomSheet<int>(
+      context: context,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16), topRight: Radius.circular(16))),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              title: Text(
+                "Server Port",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextFormField(
+                        controller: controller,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ),
+                  RaisedButton(
+                    child: Text("SAVE"),
+                    onPressed: () {
+                      Navigator.pop(
+                          context, int.parse(controller.text ?? null));
+                    },
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+            )
+          ],
+        );
+      },
+    );
+    setState(() {
+      port = newPort ?? port;
+    });
+  }
+
+  Future<String> _reload() {
+    setState(() {
+      addresses.clear();
+      isLoading = true;
+      netStream = NetworkScanner.scanNetwork("192.168.1", port);
+    });
+
+    return Future.value("DONE");
   }
 
   @override
@@ -65,73 +134,84 @@ class _HomePageState extends State<HomePage> {
         title: Text("Computers"),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(Icons.edit),
             onPressed: () async {
-              setState(() {
-                addresses.clear();
-                isLoading = true;
-                netStream = NetworkScanner.scanNetwork("192.168.1", port);
-              });
+              _changePort();
             },
-          )
+          ),
         ],
       ),
-      body: StreamBuilder(
-        stream: netStream,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          // Check to see if the open port is actually running the server
-          if (snapshot.hasData) {
-            checkIP(snapshot.data).then((computer) {
-              if (computer != null) {
-                addresses.add(computer);
-              }
-            });
-          }
-          // Generate a ListTile for each computer found
-          var items = addresses.map<Widget>(
-            (computer) {
-              return ListTile(
-                leading: Icon(Icons.computer),
-                title: Text(computer.hostname),
-                subtitle: Text(computer.ip),
-                onTap: () async {
-                  if (await checkIP(computer.ip) != null) {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GameConfirmation(
-                          computer: computer,
-                        ),
-                      ),
-                    );
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Connection Closed"),
-                      ),
-                    );
-                  } else {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Unable to connect to computer."),
-                      ),
-                    );
-                  }
-                },
-              );
-            },
-          ).toList();
-
-          if (snapshot.connectionState == ConnectionState.done) {
-            isLoading = false;
-            if (addresses.length == 0) {
-              return Center(child: Text("Unable to locate your computer."));
+      body: RefreshIndicator(
+        onRefresh: _reload,
+        child: StreamBuilder(
+          stream: netStream,
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            // Check to see if the open port is actually running the server
+            if (snapshot.hasData) {
+              checkIP(snapshot.data).then((computer) {
+                if (computer != null) {
+                  addresses.add(computer);
+                }
+              });
             }
-          } else {
-            items.insert(0, _scanningProgress());
-          }
+            // Generate a ListTile for each computer found
+            var items = addresses.map<Widget>(
+              (computer) {
+                return ListTile(
+                  leading: Icon(Icons.computer),
+                  title: Text(computer.hostname),
+                  subtitle: Text(computer.ip),
+                  onTap: () async {
+                    if (await checkIP(computer.ip) != null) {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GameConfirmation(
+                            computer: computer,
+                          ),
+                        ),
+                      );
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Connection Closed"),
+                        ),
+                      );
+                    } else {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Unable to connect to computer."),
+                        ),
+                      );
+                    }
+                  },
+                );
+              },
+            ).toList();
 
-          return ListView(children: items);
-        },
+            if (snapshot.connectionState == ConnectionState.done) {
+              isLoading = false;
+              if (addresses.length == 0) {
+                return ListView(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        "Unable to locate your computer.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w300),
+                      ),
+                    ),
+                  ],
+                );
+              }
+            } else {
+              items.insert(0, _scanningProgress());
+            }
+
+            return ListView(children: items);
+          },
+        ),
       ),
     );
   }
