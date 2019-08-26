@@ -28,45 +28,52 @@ class NetworkScanner {
 
     IsolateParams params;
     int doneCounter = 0;
-    StreamController<String> controller = StreamController<String>();
+    StreamController<String> controller;
 
-    if (port < 1 || port > 65535) {
-      // Return early before spawning threads if invalid port;
-      controller.close();
-      return controller.stream;
-    }
-
-    // Create isolates to search pieces of the subnet concurrently
-    for (int i = 0; i < isolateCount; i++) {
-      ports[i] = ReceivePort();
-      if (i == 0) {
-        params =
-            IsolateParams(i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort);
+    controller = StreamController<String>(onListen: () {
+      if (port < 1 || port > 65535) {
+        // Return early before spawning threads if invalid port;
+        controller.addError("Invalid Port Number lmao");
+        controller.close();
       } else {
-        params = IsolateParams(
-            i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort);
-      }
-      // Spawn the isolate with the given params
-      Isolate.spawn(_scanPartial, params).then((isolate) {
-        isolates[i] = isolate;
-        // Each isolate sends "DONE" when finished processing.
-        isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
-      });
-
-      // Listen for data from each isolate.
-      ports[i].listen((data) {
-        if (data != "DONE") {
-          controller.add(data);
-        } else {
-          doneCounter++;
-          ports[i].close();
-          // Wait for all isolates to finish, then return results
-          if (doneCounter == isolateCount) {
-            controller.close();
+        // NOTE: Once Streambuilder snapshot.hasError is true, it stays on forever.
+        // The only way to get it to behave is by sending some ordinary data.
+        // The parsing function will filter it but, it's super hacky
+        controller.add("DATA");
+        // Create isolates to search pieces of the subnet concurrently
+        for (int i = 0; i < isolateCount; i++) {
+          ports[i] = ReceivePort();
+          if (i == 0) {
+            params = IsolateParams(
+                i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort);
+          } else {
+            params = IsolateParams(
+                i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort);
           }
+          // Spawn the isolate with the given params
+          Isolate.spawn(_scanPartial, params).then((isolate) {
+            isolates[i] = isolate;
+            // Each isolate sends "DONE" when finished processing.
+            isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
+          });
+
+          // Listen for data from each isolate.
+          ports[i].listen((data) {
+            if (data != "DONE") {
+              controller.add(data);
+            } else {
+              doneCounter++;
+              ports[i].close();
+              // Wait for all isolates to finish, then return results
+              if (doneCounter == isolateCount) {
+                controller.close();
+              }
+            }
+          });
         }
-      });
-    }
+      }
+    });
+
     return controller.stream;
   }
 

@@ -19,6 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int port = 5001;
   bool isLoading = true;
+  bool streamError = false;
   Stream<String> netStream;
   final TextEditingController controller = TextEditingController();
 
@@ -46,9 +47,7 @@ class _HomePageState extends State<HomePage> {
       if (response.statusCode == 200) {
         return Computer(response.body, ip, port: port.toString());
       }
-    } catch (ex) {
-      print("GET error");
-    } // Expected error, ignore exception
+    } catch (ex) {} // Expected error, ignore exception
     return null;
   }
 
@@ -70,13 +69,14 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       port = int.parse(controller.text) ?? port;
-      netStream = NetworkScanner.scanNetwork("192.168.1", port);
     });
+    _reload();
   }
 
   Future<String> _reload() {
     setState(() {
       widget.addresses.clear();
+      streamError = false;
       isLoading = true;
       netStream = NetworkScanner.scanNetwork("192.168.1", port);
     });
@@ -103,19 +103,22 @@ class _HomePageState extends State<HomePage> {
         child: StreamBuilder(
           stream: netStream,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            //  Stop loading on error
-            if (snapshot.hasError) {
-              isLoading = false;
-              errorString = snapshot.error.toString();
-            }
             // Check to see if the open port is actually running the server
             if (snapshot.hasData) {
+              print("data");
+              streamError = false;
               checkIP(snapshot.data).then((computer) {
                 if (computer != null) {
                   widget.addresses.add(computer);
                 }
               });
+            } else if (snapshot.hasError) {
+              print("error"); 
+              //  Stop loading on error
+              streamError = true;
+              isLoading = false;
             }
+
             // Generate a ListTile for each computer found
             var items = widget.addresses.map<Widget>(
               (computer) {
@@ -153,13 +156,14 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.connectionState == ConnectionState.done) {
               isLoading = false;
               if (widget.addresses.length == 0) {
-                errorString = "Unable to locate your computer.";
                 return ListView(
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.all(16),
                       child: Text(
-                        errorString,
+                        streamError
+                            ? "Invalid Port Number"
+                            : "Unable to locate your computer.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w300),

@@ -6,8 +6,4 @@ void main() async {
   }, onError: (err) {
     print("ERROR");
   });
-
-  Set<String> test = Set<String>();
-  test.add(null);
-  print(test);
 }
