@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:client/models/computer.dart';
 import 'package:client/screens/game_confirmation.dart';
 import 'package:client/util/net_isolate.dart';
+import 'package:client/widgets/loading_indicator.dart';
+import 'package:client/widgets/port_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -50,23 +52,6 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  // Loading Indicator
-  Widget _scanningProgress() {
-    return Column(
-      children: <Widget>[
-        LinearProgressIndicator(),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            "Scanning Network Port: $port",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
-          ),
-        )
-      ],
-    );
-  }
-
   // Show a ModalBottomSheet to change port number
   void _changePort() async {
     controller.text = port.toString();
@@ -79,52 +64,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              title: Text(
-                "Server Port",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
-                        controller: controller,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                  ),
-                  RaisedButton(
-                    child: Text("SAVE"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  )
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-            )
-          ],
-        );
+        return PortSheet(controller);
       },
     );
 
     setState(() {
-      print("setting port");
       port = int.parse(controller.text) ?? port;
-      print(port.toString());
       netStream = NetworkScanner.scanNetwork("192.168.1", port);
     });
   }
@@ -224,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                 );
               }
             } else {
-              items.insert(0, _scanningProgress());
+              items.insert(0, LoadingIndicator(port));
             }
 
             return ListView(children: items);

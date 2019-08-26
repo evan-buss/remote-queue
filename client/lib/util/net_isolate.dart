@@ -28,47 +28,44 @@ class NetworkScanner {
 
     IsolateParams params;
     int doneCounter = 0;
-    bool error = false;
     StreamController<String> controller = StreamController<String>();
 
     if (port < 1 || port > 65535) {
-      controller.addError("Invalid Port $port");
+      // Return early before spawning threads if invalid port;
       controller.close();
-      error = true;
+      return controller.stream;
     }
 
-    if (!error) {
-      // Create isolates to search pieces of the subnet concurrently
-      for (int i = 0; i < isolateCount; i++) {
-        ports[i] = ReceivePort();
-        if (i == 0) {
-          params = IsolateParams(
-              i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort);
-        } else {
-          params = IsolateParams(
-              i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort);
-        }
-        // Spawn the isolate with the given params
-        Isolate.spawn(_scanPartial, params).then((isolate) {
-          isolates[i] = isolate;
-          // Each isolate sends "DONE" when finished processing.
-          isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
-        });
-
-        // Listen for data from each isolate.
-        ports[i].listen((data) {
-          if (data != "DONE") {
-            controller.add(data);
-          } else {
-            doneCounter++;
-            ports[i].close();
-            // Wait for all isolates to finish, then return results
-            if (doneCounter == isolateCount) {
-              controller.close();
-            }
-          }
-        });
+    // Create isolates to search pieces of the subnet concurrently
+    for (int i = 0; i < isolateCount; i++) {
+      ports[i] = ReceivePort();
+      if (i == 0) {
+        params =
+            IsolateParams(i + 1, (i + 1) * 51, subnet, port, ports[i].sendPort);
+      } else {
+        params = IsolateParams(
+            i * 51, (i + 1) * 51, subnet, port, ports[i].sendPort);
       }
+      // Spawn the isolate with the given params
+      Isolate.spawn(_scanPartial, params).then((isolate) {
+        isolates[i] = isolate;
+        // Each isolate sends "DONE" when finished processing.
+        isolates[i].addOnExitListener(ports[i].sendPort, response: "DONE");
+      });
+
+      // Listen for data from each isolate.
+      ports[i].listen((data) {
+        if (data != "DONE") {
+          controller.add(data);
+        } else {
+          doneCounter++;
+          ports[i].close();
+          // Wait for all isolates to finish, then return results
+          if (doneCounter == isolateCount) {
+            controller.close();
+          }
+        }
+      });
     }
     return controller.stream;
   }
