@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:client/models/computer.dart';
 import 'package:client/screens/game_confirmation.dart';
 import 'package:client/util/net_isolate.dart';

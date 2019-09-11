@@ -5,8 +5,6 @@ import * as os from "os";
 import { Server } from "./server";
 import * as robot from "robotjs";
 import { GameState, GameProfile } from "./game";
-import { create } from "domain";
-
 
 let selectIndex: number = 0;
 let server: Server;
@@ -40,8 +38,14 @@ let successX = document.getElementById("successX");
 let successY = document.getElementById("successY");
 let successColor = document.getElementById("successColor");
 
+document.addEventListener('DOMContentLoaded', function () {
+  M.AutoInit();
+  loadProfiles();
+});
 
-window.onload = loadProfiles;
+function reloadSelect() {
+  M.FormSelect.init(gameSelect, {});
+}
 
 // Try to load the ~/.rqProfiles file, otherwise intialized the app without it
 function loadProfiles() {
@@ -56,6 +60,7 @@ function loadProfiles() {
       opt.value = (selectIndex + 1).toString();
       opt.innerHTML = "Unamed Profile";
       gameSelect.appendChild(opt);
+      reloadSelect();
     } else {
       profiles = JSON.parse(data)["profiles"];
       portInput.value = JSON.parse(data)["port"];
@@ -66,6 +71,7 @@ function loadProfiles() {
         opt.innerHTML = profiles[i].name !== undefined ? profiles[i].name : "UNKNOWN NAME";
         gameSelect.appendChild(opt);
       }
+      reloadSelect();
       updateDisplays();
     }
   });
@@ -116,6 +122,7 @@ function createProfile() {
   // Switch the current view to the new profile
   selectIndex = profiles.length - 1;
   gameSelect.selectedIndex = selectIndex;
+  reloadSelect();
   updateDisplays();
 }
 
@@ -139,6 +146,7 @@ function deleteProfile() {
   if (server !== undefined) {
     server.setGame(profiles[selectIndex]);
   }
+  reloadSelect();
   updateDisplays();
 }
 
@@ -147,9 +155,10 @@ function deleteProfile() {
 // ================================
 
 // Update the profile list and the select dropdown name 
-nameInput.oninput = () => {
+nameInput.onchange = () => {
   profiles[selectIndex].name = nameInput.value;
   gameSelect.options[selectIndex].text = nameInput.value;
+  reloadSelect();
 };
 
 // Update the delay settings on input
@@ -200,8 +209,7 @@ function startServer() {
   server.setGame(profiles[selectIndex]);
   server.startServer();
   info.innerText = "Server Started";
-  info.classList.add("is-success")
-  info.classList.remove("is-danger")
+  info.classList.add("pulse")
 }
 
 stopBtn.onclick = stopServer;
@@ -210,8 +218,7 @@ stopBtn.onclick = stopServer;
 function stopServer() {
   server.stopServer();
   info.innerText = "Server Stopped";
-  info.classList.add("is-danger")
-  info.classList.remove("is-success")
+  info.classList.remove("pulse")
 }
 
 /** 
@@ -243,6 +250,7 @@ function getScreenData(sec: number): Promise<GameState> {
 function updateDisplays() {
 
   nameInput.value = profiles[selectIndex].name;
+  M.updateTextFields();
   queueDurationInput.value = profiles[selectIndex].queueDuration.toString();
 
   queueX.innerText = profiles[selectIndex].queueState.x.toString();
