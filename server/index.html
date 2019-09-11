@@ -16,17 +16,19 @@
 <body>
   <!-- Server Controls / Settings -->
   <div class="row">
-    <div class="col s12 teal lighten-2">
+    <div class="main-header col s12 cyan lighten-2">
       <h4 class="center-align">Remote Queue Server</h4>
     </div>
-  </div>
-  <div class="row container">
     <div class="col s6">
-      <div class="row">
-        <a class="waves-effect waves-light btn-large green darken-2" id="startBtn"><i
+      <div class="server-buttons">
+        <a class=" waves-effect waves-light btn-large green lighten-2" id="startBtn"><i
             class="material-icons left">play_circle_filled</i>Start</a>
         <a class="waves-effect waves-light btn-large red darken-1" id="stopBtn"><i
             class="material-icons left">stop</i>Stop</a>
+      </div>
+      <div class="server-status card-panel grey lighten-5 z-depth-1">
+        <i class="material-icons left">info</i>
+        <div id="info">Server Not Running</div>
       </div>
     </div>
     <div class="col s6">
@@ -34,132 +36,169 @@
         <label class="label">Server Port</label>
         <input class="input" type="text" id="portInput" value="5001" />
       </div>
-      <div class="card-panel grey lighten-5 z-depth-1">
-        <i class="material-icons left">info</i>
-        <div id="info">Server Not Running</div>
+      <!-- State Selection Delay -->
+      <div class="input-field">
+        <label class="label">Selection Delay (seconds)</label>
+        <input class="input" type="text" id="delayInput" value="3"></input>
       </div>
     </div>
-
   </div>
 
   <!-- Profiles Management Controls -->
   <div class="row">
-    <div class="col s12 teal lighten-2">
-      <h4 class="center-align">Active Game Profile</h4>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="input-field col s6">
-      <select name="games" id="games"></select>
-      <label>Game Profile Selection</label>
-
-      <div class="row">
-        <div class="col s12">
-          <!-- State Selection Delay -->
-          <div class="input-field">
-            <label class="label">Selection Delay (seconds)</label>
-            <input class="input" type="text" id="delayInput" value="3"></input>
-          </div>
-        </div>
-      </div>
-    </div>
     <div class="col s6">
-      <div class="row"><a class="waves-effect waves-light btn cyan lighten-2" id="saveBtn">
+      <div class="col s12 cyan lighten-2">
+        <h4 class="center-align">Active Game Profile</h4>
+      </div>
+      <div class="input-field col s12">
+        <select name="games" id="games"></select>
+        <label>Game Profile Selection</label>
+      </div>
+      <div class="col s12" id="profile-buttons">
+        <a class="waves-effect waves-light btn cyan lighten-2" id="saveBtn">
           <i class="material-icons left">save</i>
           Save
-        </a></div>
-      <div class="row">
+        </a>
         <a class="waves-effect waves-light btn green lighten-2" id="addBtn">
           <i class="material-icons left">add_circle</i>
           New
         </a>
-      </div>
-      <div class="row">
         <a class="waves-effect waves-light btn red darken-2" id="deleteBtn">
           <i class="material-icons left">delete</i>
           Delete
         </a>
       </div>
     </div>
-  </div>
+    <div class="col s6">
+      <!-- Selected Profile Settings -->
+      <!-- <div class="row"> -->
+      <div class="col s12 cyan lighten-2">
+        <h4 class="center-align">Profile Settings</h4>
+      </div>
+      <!-- </div> -->
 
-  <!-- Selected Profile Settings -->
-  <div class="row">
-    <div class="col s12 teal lighten-2">
-      <h4 class="center-align">Profile Settings</h4>
-    </div>
-  </div>
+      <div id="profile-settings">
+        <!-- Selected Profile Name Input -->
+        <div class="input-field col s12">
+          <label class="active" for="nameInput">Name</label>
+          <input class="input" type="text" id="nameInput"></input>
+        </div>
 
-  <div class="container">
-    <!-- Selected Profile Name Input -->
-    <div class="input-field">
-      <label class="active" for="nameInput">Name</label>
-      <input class="input" type="text" id="nameInput"></input>
-    </div>
+        <!-- State Selection Delay -->
+        <div class="input-field col s12">
+          <label>Queue Duration (seconds)</label>
+          <input class="input" type="text" id="queueDurationInput" value="20" />
+        </div>
 
-    <!-- State Selection Delay -->
-    <div class="input-field">
-      <label>Queue Duration (seconds)</label>
-      <input class="input" type="text" id="queueDurationInput" value="20" />
-    </div>
-
-    <ul class="collapsible">
-      <li>
-        <div class="collapsible-header"><i class="material-icons">games</i>Queue State Configuration</div>
-        <div class="collapsible-body">
-          <div class="row">
-            <div class="col s6">
-              <a class="waves-effect waves-light btn" id="queueBtn"><i class="material-icons left">gps_fixed</i>Choose
-                Location</a>
+        <!-- Collapsible list of game states -->
+        <ul class="collapsible col s12">
+          <li class="active">
+            <div class="collapsible-header">
+              <i class="material-icons">games</i>Queue State Configuration
             </div>
-            <div class="col s6">
+            <div class="collapsible-body">
               <div class="row">
-                <div class="col s6">
-                  <label for="queueX" class="label">X: </label>
-                  <p id="queueX"></p>
+                <div class="col s4">
+                  <a class="waves-effect waves-light btn" id="queueBtn"><i
+                      class="material-icons left">gps_fixed</i>SELECT</a>
                 </div>
                 <div class="col s6">
-                  <label for="queueY" class="label">Y: </label>
-                  <p id="queueY"></p>
+                  <div class="col s4">
+                    <p>X: <span id="queueX"></span></p>
+                    <p>Y: <span id="queueY"></span></p>
+                  </div>
+                  <div class="col s8">
+                    <p>Color:
+                      <span class="badge" id="queueColor"></span>
+                    </p>
+                  </div>
                 </div>
               </div>
-              <label for="queueColor" class="label">Color: </label>
-              <span class="badge" id="queueColor"></span>
             </div>
-          </div>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">error</i>Queue Popped Configuration</div>
-        <div class="collapsible-body">
-          <div class="row">
-            <div class="col s6">
-              <a class="waves-effect waves-light btn" id="successBtn"><i class="material-icons left">gps_fixed</i>Choose
-                Location</a>
-            </div>
-            <div class="col s6">
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">error</i>Queue Popped Configuration</div>
+            <div class="collapsible-body">
               <div class="row">
-                <div class="col s6"><label for="successX" class="label">X: </label>
-                  <p id="successX"></p>
+                <div class="col s4">
+                  <a class="waves-effect waves-light btn" id="successBtn"><i
+                      class="material-icons left">gps_fixed</i>SELECT</a>
                 </div>
-                <div class="col s6"><label for="successX" class="label">Y: </label>
-                  <p id="successY"></p>
+                <div class="col s6">
+                  <div class="col s4">
+                    <p>X: <span id="successX"></span></p>
+                    <p>Y: <span id="successY"></span></p>
+                  </div>
+                  <div class="col s8">
+                    <p>Color:
+                      <span class="badge" id="successColor"></span>
+                    </p>
+                  </div>
                 </div>
               </div>
-              <label for="successColor" class="label">Color: </label>
-              <span class="badge" id="successColor"></span>
-            </div>
-          </div>
-        </div>
-      </li>
-    </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
+
+
 </body>
 
 <style>
   h4 {
     color: white;
+  }
+
+  p {
+    margin-top: 0;
+  }
+
+  div.row {
+    margin: 0;
+  }
+
+  div.col.s6 {
+    padding: 0;
+  }
+
+  .main-header {
+    margin-bottom: 20px;
+  }
+
+  .server-buttons {
+    padding: 10px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  .server-status {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 10%;
+    width: 80%;
+  }
+
+  #profile-buttons {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  #profile-settings {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  div.collapsible-body {
+    padding: 20px;
+  }
+
+  .badge {
+    border-radius: 5px;
   }
 </style>
 

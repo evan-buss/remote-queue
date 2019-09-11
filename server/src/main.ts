@@ -10,8 +10,9 @@ function createWindow() {
       nodeIntegration: true
     },
     autoHideMenuBar: true,
-    height: 610,
-    width: 800,
+    height: 750,
+    width: 950,
+    resizable: false,
   });
 
   // and load the index.html of the app.
@@ -19,7 +20,6 @@ function createWindow() {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
-  mainWindow.setResizable(false);
 
   // Emitted when the window is closed.
   mainWindow.on("closed", () => {

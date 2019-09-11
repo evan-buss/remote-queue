@@ -16,6 +16,7 @@ let startBtn = document.getElementById("startBtn");
 let stopBtn = document.getElementById("stopBtn");
 let portInput = <HTMLInputElement>document.getElementById("portInput");
 let info = document.getElementById("info");
+let statusCard = document.getElementsByClassName("server-status");
 
 // PROFILES CONFIGURATION
 let gameSelect = <HTMLSelectElement>document.getElementById("games");
@@ -209,7 +210,7 @@ function startServer() {
   server.setGame(profiles[selectIndex]);
   server.startServer();
   info.innerText = "Server Started";
-  info.classList.add("pulse")
+  statusCard[0].classList.add("pulse")
 }
 
 stopBtn.onclick = stopServer;
@@ -218,7 +219,7 @@ stopBtn.onclick = stopServer;
 function stopServer() {
   server.stopServer();
   info.innerText = "Server Stopped";
-  info.classList.remove("pulse")
+  statusCard[0].classList.remove("pulse")
 }
 
 /** 
