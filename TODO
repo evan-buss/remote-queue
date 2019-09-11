@@ -5,5 +5,6 @@ Improvements
   - Design
     - Make client app messages look better.
     - Add CSS to desktop app
+    - Use Materialize instead of Bulma css 
 
   - Clean up server code.
