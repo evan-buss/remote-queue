@@ -22,7 +22,7 @@
   "license": "CC0-1.0",
   "dependencies": {
     "@types/materialize-css": "^1.0.6",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "materialize-css": "^1.0.0-rc.2",
     "robotjs": "github:sidharth0094/robotjs#master",
     "ws": "^7.1.2"
